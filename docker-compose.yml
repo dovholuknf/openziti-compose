@@ -1,0 +1,72 @@
+services:
+  ziti-controller:
+    image: "openziti/ziti-controller:${ZITI_VERSION}"
+    ports:
+      - ${ZITI_INTERFACE:-0.0.0.0}:${ZITI_CTRL_EDGE_ADVERTISED_PORT:-1280}:${ZITI_CTRL_EDGE_ADVERTISED_PORT:-1280}
+      - ${ZITI_INTERFACE:-0.0.0.0}:${ZITI_CTRL_ADVERTISED_PORT:-6262}:${ZITI_CTRL_ADVERTISED_PORT:-6262}
+    environment:
+      - EXTERNAL_DNS 
+      - ZITI_USER 
+      - ZITI_PWD 
+      - ZITI_EDGE_IDENTITY_ENROLLMENT_DURATION 
+      - ZITI_ROUTER_ENROLLMENT_DURATION 
+      - EXTERNAL_CA_KEY 
+      - EXTERNAL_CA_CERT 
+      - EXTERNAL_CA_PARENT_CHAIN 
+      - ZITI_HOSTNAME=${EXTERNAL_DNS}
+      - ZITI_CTRL_ADVERTISED_PORT
+      - ZITI_CTRL_EDGE_ADVERTISED_PORT
+      - ZITI_ROUTER_PORT
+    networks:
+      ziti:
+        aliases:
+          - ziti-controller
+          - ziti-edge-controller
+          - ${EXTERNAL_DNS} 
+    volumes:
+      - ziti-fs:/opt/ziti
+    command: "run /opt/ziti/quickstart/${EXTERNAL_DNS}.yaml"
+
+  ziti-edge-router:
+    image: "openziti/ziti-router:${ZITI_VERSION}"
+    depends_on:
+      - ziti-controller
+    ports:
+      - ${ZITI_INTERFACE:-0.0.0.0}:${ZITI_ROUTER_PORT:-3022}:${ZITI_ROUTER_PORT:-3022}
+      - ${ZITI_INTERFACE:-0.0.0.0}:${ZITI_ROUTER_LISTENER_BIND_PORT:-10080}:${ZITI_ROUTER_LISTENER_BIND_PORT:-10080}
+    environment:
+      - EXTERNAL_DNS
+      - ZITI_USER
+      - ZITI_PWD
+      - ZITI_EDGE_IDENTITY_ENROLLMENT_DURATION
+      - ZITI_ROUTER_ENROLLMENT_DURATION
+      - EXTERNAL_CA_KEY
+      - EXTERNAL_CA_CERT
+      - EXTERNAL_CA_PARENT_CHAIN
+      - ZITI_HOSTNAME=${EXTERNAL_DNS}
+      - ZITI_CTRL_ADVERTISED_PORT
+      - ZITI_CTRL_EDGE_ADVERTISED_PORT
+      - ZITI_ROUTER_PORT
+    networks:
+      - ziti
+    volumes:
+      - ziti-fs:/opt/ziti
+    command: "run /opt/ziti/quickstart/${EXTERNAL_DNS}-edge-router.yaml"
+
+  ziti-console:
+    image: openziti/zac
+    working_dir: /usr/src/app
+    depends_on:
+      - ziti-controller
+    ports:
+      - ${ZITI_INTERFACE:-0.0.0.0}:8443:8443
+    volumes:
+      - ziti-fs:/opt/ziti
+    networks:
+      - ziti
+
+networks:
+  ziti:
+
+volumes:
+  ziti-fs:
