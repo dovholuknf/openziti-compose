@@ -118,9 +118,9 @@ export ZITI_PKI_SIGNER_CERT="${ZITI_PKI}/${ZITI_SIGN_CA_NAME}/certs/${ZITI_SIGN_
 ziti create config controller >${ZITI_HOME}/${ZITI_HOSTNAME}.yaml
 
 
-cat ./pki/my.root.ca/certs/my.root.ca.cert > "/tmp/sep4/openziti-compose/pki/${ZITI_HOSTNAME}-network-components/cas.pem"
-cat ./pki/my.root.ca/certs/intermediate.from.external.ca.cert >> "/tmp/sep4/openziti-compose/pki/${ZITI_HOSTNAME}-network-components/cas.pem"
-cp "/tmp/sep4/openziti-compose/pki/${ZITI_HOSTNAME}-network-components/cas.pem" "/tmp/sep4/openziti-compose/pki/${ZITI_HOSTNAME}-edge/edge.cas.pem"
+cat "${ZITI_PKI}/my.root.ca/certs/my.root.ca.cert" > "${ZITI_PKI}/${ZITI_HOSTNAME}-network-components/cas.pem"
+cat "${ZITI_PKI}/pki/my.root.ca/certs/intermediate.from.external.ca.cert" >> "${ZITI_PKI}/${ZITI_HOSTNAME}-network-components/cas.pem"
+cp "/tmp/sep4/openziti-compose/pki/${ZITI_HOSTNAME}-network-components/cas.pem" "${ZITI_PKI}/${ZITI_HOSTNAME}-edge/edge.cas.pem"
 mkdir ${ZITI_HOME}/db
 ziti controller edge init "${ZITI_HOME}/${ZITI_HOSTNAME}.yaml" -u "admin" -p $ZITI_PWD
 
